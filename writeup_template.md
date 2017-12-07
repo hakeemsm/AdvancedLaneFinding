@@ -21,7 +21,7 @@ The goals / steps of this project are the following:
 [image3]: ./output_images/color_grad_img.png "Binary Example"
 [image4]: ./output_images/persp_xform.png "Warp Example"
 [image5]: ./output_images/test1._lane_fit.png "Fit Visual"
-[image6]: ./output_images/lane_id_straight_stats.png "Output"
+[image6]: ./output_images/lane_id_curved_stats.png "Output"
 [video1]: ./project_video_output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
