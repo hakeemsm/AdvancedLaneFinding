@@ -20,7 +20,7 @@ The goals / steps of this project are the following:
 [image3]: ./output_images/color_grad_img.png "Binary Example"
 [image4]: ./output_images/persp_xform.png "Warp Example"
 [image5]: ./output_images/test1._lane_fit.png "Fit Visual"
-[image6]: ./output_images/lane_id.png "Output"
+[image6]: ./output_images/lane_id_straight_stats.png "Output"
 [video1]: ./project_video_output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -62,29 +62,9 @@ I used a combination of color and gradient thresholds to generate a binary image
 
 Perspective transform for images is done by the class `Perspective_Transform` and the two included methods in it, `transform()` and `inverse_transform()`. This class can be found in cell 16 of the IPython notebook. The constructor in the class takes the source and destination points as the input parameters and stores them as local variables. The transform is done from the two methods on the input image by calling `cv2.warpPerspective()` method from the OpenCV library. 
 
-The source and destination points were chosen like thus:
 
-```python
-src = np.float32(
-    [[(img_size[0] / 2) - 150, img_size[1] / 1.5],
-    [(img_size[0] / 2) + 160, img_size[1]],
-    [img_size[0] - 30, img_size[1]],
-    [img_size[0] / 32, img_size[1]]])
-dst = np.float32(
-    [0, 0],
-    [img_size[0], 0],
-    [img_size[0] - 30, img_size[1]],
-    [[img_size[0] / 32, img_size[1]]])
-```
 
-This resulted in the following source and destination points:
-
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 490, 480      | 120, 0        | 
-| 800, 480      | 1220, 0       |
-| 1250, 720     | 1280, 720     |
-| 40, 460       | 100, 720      |
+Here is a [link to the cell](./AdvancedLaneFinding.ipynb#warp-pts) containing source & destination points for warp
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
@@ -92,7 +72,7 @@ I verified that my perspective transform was working as expected by drawing the 
 
 #### 4. Lane line identification and fitting to a polynomial
 
-Fitting of the lanes to a polynomial and identifying the lanes was accomplished by first getting a histogram of the lane plots. From the histogram, peaks were extracted as the regions containg the pixel density for the lanes. Using the peaks, the baseline was calculated. A sliding window mechanism was used to detect the lanes as they curve along. The number of windows was set to 10. A loop was set up to iterate through each window and the coordinates were calculated for x-left, x-right, y-low and y-high points. Using these values, the left and right fit for the two lanes were set using the non zero values from the binary warped image matrix. This code is part of the `sliding_window_line_fit` function in cell 20 of the IPython notebook.
+Fitting of the lanes to a polynomial and identifying the lanes was accomplished by first getting a histogram of the lane plots. From the histogram, peaks were extracted as the regions containg the pixel density for the lanes. Using the peaks, the baseline was calculated. A sliding window mechanism was used to detect the lanes as they curve along. The number of windows was set to 10. A loop was set up to iterate through each window and the coordinates were calculated for x-left, x-right, y-low and y-high points. Using these values, the left and right fit for the two lanes were set using the non zero values from the binary warped image matrix. This code is part of the `sliding_window_lane_fit_polynomial` function in cell 20 of the IPython notebook.
 
 Here is the image of identified lane lines plotted with sliding windows:
 
@@ -102,11 +82,11 @@ The rest of the images can be found in the output_images folder of this repo
 
 #### 5. Radius of curvature classification
 
-The radius of curvature calculation is contained in `calc_curv_rad_and_center_dist` in cell 25 of the IPython notebook. The curvature is calculated using the values returned by `sliding_window_line_fit` method
+The radius of curvature calculation is contained in `calc_radius_curvature` in cell 25 of the IPython notebook. The curvature is calculated using the values returned by `sliding_window_lane_fit_polynomial` method
 
 #### 6. Plotting the image back to the lane lines.
 
-The plotted lanes are projected back to the road using the code in the `draw_lane` method in cell 27 of the notebook. This method takes the original image, the binary image from the pipeline, the left and right fit from `sliding_window_line_fit` and the inverse perspective transform. The image is plotted using `fillPoly` and `polyLines` methods from the OpenCV library
+The plotted lanes are projected back to the road using the code in the `lane_area_identify` method in cell 27 of the notebook. This method takes the original image, the binary image from the pipeline, the left and right fit from `sliding_window_lane_fit_polynomial` and the inverse perspective transform. The image is plotted using `fillPoly` and `polyLines` methods from the OpenCV library
 
 ![alt text][image6]
 
@@ -115,7 +95,7 @@ The plotted lanes are projected back to the road using the code in the `draw_lan
 ### Pipeline (video)
 
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_video_output.mp4)
 
 ---
 
@@ -124,6 +104,8 @@ Here's a [link to my video result](./project_video.mp4)
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further. 
 
-1.  The calibration and distortion correction measurements were straightforward but a lot of time had to be spend figuring out source and destination points for the perspective transform. I had to try out several values for the destination points since most of the initial values only worked on a subset of the images. The code in `sliding_window_line_fit` and `line_fit_from_prev_frame` came really handy in testing various values out since they gave an accurate projection of whether the selected points were a good fit for all the images
+1.  The calibration and distortion correction measurements were straightforward but a lot of time had to be spend figuring out source and destination points for the perspective transform. I had to try out several values for the destination points since most of the initial values only worked on a subset of the images. The code in `sliding_window_lane_fit_polynomial` and `line_fit_from_prev_frame` came really handy in testing various values out since they gave an accurate projection of whether the selected points were a good fit for all the images
 
 2. The lane area identification was another challenge since calculating an accurate fit for all the different angles and measurements was tedious and took several iterations before I could finalize the equations
+
+3. Applying the model on the challenge video shows the projected lanes having a wide variation from the actual road for sharp turns. So this model will have some issues on twisting & turning lanes. It can be resolved by more finely tweaking the destination points for the warp such that the lane projection is accurate
