@@ -34,7 +34,7 @@ The goals / steps of this project are the following:
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the second code cell of the IPython notebook located in "./AdvancedLaneFinding.ipynb" in the method `get_calibration_coeffs`
+The code for this step is contained in the `get_calibration_coeffs` method of `AdvancedLaneFinding` class in cell 2 of the IPython notebook located in "./AdvancedLaneFinding.ipynb"
 
 I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
 
@@ -46,26 +46,26 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 
 #### 1. Distortion-corrected image.
 
-The distortion correction code can be found in cell 5 of the IPython notebook. To demonstrate this step, I applied the `cv2.undistort()` to one of the test images like this one:
+The distortion correction code can be found in the method `undistort_img` method in `AdvancedLaneFinding` class. To demonstrate this step, I applied the `cv2.undistort()` to one of the test images like this one:
 ![alt text][image2]
 
 #### 2. Color and gradient thresholded binary image.
 
-First, Gradient threshold was calculated by applying sobel, magnitude and direction gradient to the input image after it was converted to gray scale. The code for these three calculations can be found in cells 8, 9 and 10 of the IPython notebook. A minimum threshold of 0 and max of 255 was used for all three computations with a kernel size of 3. The `combined_grad()` function in cell 11 applies all three gradients to the input image and returns a filtered image from the output of the three transforms. 
+First, Gradient threshold was calculated by applying sobel, magnitude and direction gradient to the input image after it was converted to gray scale. The code for these three calculations can be found in cells 8, 9 and 10 of the IPython notebook. A minimum threshold of 0 and max of 255 was used for all three computations with a kernel size of 3. The `combined_grad()` method applies all three gradients to the input image and returns a filtered image from the output of the three transforms. 
 
 Color transforms are applied after gradient using both HLS and RGB channels. The S channel from HLS and R from RGB were selected since they do a better job at detecting lane lines of any color and width. Code for these two transforms is in cells 13 and 14 of the IPython notebook
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+I used a combination of color and gradient thresholds to generate a binary image (thresholding steps in methods `hls_thresh` and `rgb_thresh ` of the `AdvancedLaneFinding` class)
 
 ![alt text][image3]
 
 #### 3. Perspective transform
 
-Perspective transform for images is done by the class `Perspective_Transform` and the two included methods in it, `transform()` and `inverse_transform()`. This class can be found in cell 16 of the IPython notebook. The constructor in the class takes the source and destination points as the input parameters and stores them as local variables. The transform is done from the two methods on the input image by calling `cv2.warpPerspective()` method from the OpenCV library. 
+Perspective transform for images is done by the method `transform`. The transform is done from the two methods on the input image by calling `cv2.warpPerspective()` method from the OpenCV library. 
 
 
 
-Here is a [link to the cell](./AdvancedLaneFinding.ipynb#warp-pts) containing source & destination points for warp
+Here is a [link to the cell](./AdvancedLaneFinding.ipynb#Camera-Calibration) containing source & destination points for warp
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
@@ -73,7 +73,7 @@ I verified that my perspective transform was working as expected by drawing the 
 
 #### 4. Lane line identification and fitting to a polynomial
 
-Fitting of the lanes to a polynomial and identifying the lanes was accomplished by first getting a histogram of the lane plots. From the histogram, peaks were extracted as the regions containg the pixel density for the lanes. Using the peaks, the baseline was calculated. A sliding window mechanism was used to detect the lanes as they curve along. The number of windows was set to 10. A loop was set up to iterate through each window and the coordinates were calculated for x-left, x-right, y-low and y-high points. Using these values, the left and right fit for the two lanes were set using the non zero values from the binary warped image matrix. This code is part of the `sliding_window_lane_fit_polynomial` function in cell 20 of the IPython notebook.
+Fitting of the lanes to a polynomial and identifying the lanes was accomplished by first getting a histogram of the lane plots. From the histogram, peaks were extracted as the regions containg the pixel density for the lanes. Using the peaks, the baseline was calculated. A sliding window mechanism was used to detect the lanes as they curve along. The number of windows was set to 9. A loop was set up to iterate through each window and the coordinates were calculated for x-left, x-right, y-low and y-high points. Using these values, the left and right fit for the two lanes were set using the non zero values from the binary warped image matrix. This code is part of the `sliding_window_lane_fit_polynomial` method.
 
 Here is the image of identified lane lines plotted with sliding windows:
 
@@ -83,11 +83,11 @@ The rest of the images can be found in the output_images folder of this repo
 
 #### 5. Radius of curvature classification
 
-The radius of curvature calculation is contained in `calc_radius_curvature` in cell 25 of the IPython notebook. The curvature is calculated using the values returned by `sliding_window_lane_fit_polynomial` method
+The radius of curvature calculation is contained in `calc_radius_curvature` method. The curvature is calculated using the values returned by `sliding_window_lane_fit_polynomial` method
 
 #### 6. Plotting the image back to the lane lines.
 
-The plotted lanes are projected back to the road using the code in the `lane_area_identify` method in cell 27 of the notebook. This method takes the original image, the binary image from the pipeline, the left and right fit from `sliding_window_lane_fit_polynomial` and the inverse perspective transform. The image is plotted using `fillPoly` and `polyLines` methods from the OpenCV library
+The plotted lanes are projected back to the road using the code in the `lane_area_identify` method. This method takes the original image, the binary image from the pipeline, the left and right fit from `sliding_window_lane_fit_polynomial` and the inverse perspective transform. The image is plotted using `fillPoly` and `polyLines` methods from the OpenCV library
 
 ![alt text][image6]
 
